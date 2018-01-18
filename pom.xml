@@ -29,7 +29,7 @@
 <password>Anisbaig@821</password>
 <workerType>Micro</workerType>
 <redeploy>true</redeploy>
-<environment>Sandbox</environment>
+<environment>Design</environment>
              </configuration>
         <executions>
             <execution>
