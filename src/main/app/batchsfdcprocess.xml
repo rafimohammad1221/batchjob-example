@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/objectstore http://www.mulesoft.org/schema/mule/objectstore/current/mule-objectstore.xsd">
+    <sfdc:config name="Salesforce__Basic_Authentication" username="rafi.gladrag@gmail.com" password="anisbaig@822" securityToken="QvUVkyBMCMZwAykHaJyH6S3Pt" url="https://login.salesforce.com/services/Soap/u/40.0" doc:name="Salesforce: Basic Authentication"/>
+    
+    <batch:job name="batchsfdcprocessBatch">
+        <batch:process-records>
+            <batch:step name="Batch_Step">
+                <logger message="Message is #[payload]" level="INFO" doc:name="Logger"/>
+            </batch:step>
+        </batch:process-records>
+    </batch:job>
+    <flow name="batchsfdcprocessFlow" processingStrategy="synchronous">
+        <poll doc:name="Poll">
+            <fixed-frequency-scheduler frequency="10" timeUnit="SECONDS"/>
+            <watermark variable="timestamp" default-expression="YESTERDAY" selector="LAST" selector-expression="#[payload.LastModifiedDate]" />
+            <sfdc:query config-ref="Salesforce__Basic_Authentication" query="dsql:SELECT Id,LastModifiedDate,Name FROM Contact WHERE LastModifiedDate &gt; #[flowVars.timestamp]" doc:name="Salesforce"/>
+        </poll>
+        <batch:execute name="batchsfdcprocessBatch" doc:name="Batch Execute"/>
+    </flow>
+</mule>
